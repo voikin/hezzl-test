@@ -139,10 +139,10 @@ func (gc *GoodController) GetGoods(c *gin.Context) {
 		}
 	}
 	if offsetStr == "" {
-		offset = 0
+		offset = 1
 	} else {
 		offset, err = strconv.Atoi(offsetStr)
-		if err != nil || offset < 0 {
+		if err != nil || offset < 1 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset parameter"})
 			return
 		}

@@ -124,7 +124,7 @@ func (gr *GoodRepo) GetGood(ctx context.Context, id, projectID int) (good.Good, 
 
 func (gr *GoodRepo) GetGoods(ctx context.Context, limit, offset int) ([]good.Good, error) {
 	const fName = "GetGoods"
-	query := fmt.Sprintf("SELECT id, project_id, name, description, priority, removed, created_at FROM goods LIMIT %d OFFSET %d", limit, offset)
+	query := fmt.Sprintf("SELECT id, project_id, name, description, priority, removed, created_at FROM goods LIMIT %d OFFSET %d", limit, offset-1)
 	rows, err := gr.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", fName, err)
@@ -144,6 +144,8 @@ func (gr *GoodRepo) GetGoods(ctx context.Context, limit, offset int) ([]good.Goo
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("%s: %w", fName, err)
 	}
+
+	fmt.Println(goodsList)
 
 	return goodsList, nil
 }
