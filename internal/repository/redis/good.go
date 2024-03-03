@@ -36,7 +36,9 @@ func (gr *RedisGoodRepo) CreateGood(ctx context.Context, name string, projectId 
 }
 
 func (gr *RedisGoodRepo) GetGoods(ctx context.Context, limit, offset int) ([]good.Good, error) {
-	val, err := gr.cache.Get(ctx, "GetGoods").Bytes()
+	goodsKey := fmt.Sprintf("GetGoods-%d-%d", limit, offset)
+	val, err := gr.cache.Get(ctx, goodsKey).Bytes()
+
 	if err != nil {
 		goodsList, err := gr.GoodRepo.GetGoods(ctx, limit, offset)
 		if err != nil {
@@ -47,14 +49,16 @@ func (gr *RedisGoodRepo) GetGoods(ctx context.Context, limit, offset int) ([]goo
 		if err != nil {
 			return goodsList, nil
 		}
-		gr.cache.SetNX(ctx, "GetGoods", data, _defaultExpiration)
+		gr.cache.SetNX(ctx, goodsKey, data, _defaultExpiration)
 		return goodsList, nil
 	}
+
 	goodsList := make([]good.Good, 0)
 	err = json.Unmarshal(val, &goodsList)
 	if err != nil {
 		return nil, err
 	}
+	
 	return goodsList, err
 }
 
