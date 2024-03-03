@@ -1,0 +1,66 @@
+version: '3.7'
+
+services:
+  app:
+    depends_on:
+      - pg
+      - redis
+      - nats
+      - clickhouse
+    build:
+      context: .
+    volumes:
+      - ./config/:/bin/app/config/
+    links:
+      - "pg:pg"
+      - "redis:redis"
+      - "nats:nats"
+      - "clickhouse:clickhouse"
+    environment:
+      REDIS_ADDR: "redis:6379"
+      CH_ADDR: "clickhouse"
+      NATS_URL: "nats"
+      POSTGRES_URL: "postgres://root:root@pg/app?sslmode=disable"
+    ports:
+      - "8080:8080"
+
+  pg:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'root'
+      POSTGRES_DB: 'app'
+    restart: on-failure
+    volumes:
+      - ./migrations/postgres/:/docker-entrypoint-initdb.d/
+    ports:
+      - ${POSTGRES_PORT:-5555}:5432
+
+  redis:
+    image: 'redis:alpine'
+    command: redis-server --requirepass root
+    ports:
+      - '6379:6379'
+    environment:
+      REDIS_REPLICATION_MODE: 'master'
+
+  nats:
+    image: nats:latest
+    ports:
+      - '8222:8222'
+      - '4222:4222'
+    command: '--http_port 8222 -js'
+
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    restart: always
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+    volumes:
+      - ./migrations/clickhouse/:/docker-entrypoint-initdb.d/
+      - ./clickhousedb:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_USER: 'root'
+      CLICKHOUSE_PASSWORD: 'root'
+      CLICKHOUSE_DB: 'logs'

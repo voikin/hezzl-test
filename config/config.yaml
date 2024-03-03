@@ -1,0 +1,21 @@
+api:
+  port: "8080"
+
+postgres:
+  url: "postgres://root:root@127.0.0.1:5555/app?sslmode=disable"
+
+redis:
+  password: "root"
+  addr: "localhost:6379"
+  db: 0
+
+nats:
+  url: ":4222"
+
+clickhouse:
+  username: "root"
+  password: "root"
+  native_port: 9000
+  http_port: 8123
+  db: "logs"
+  addr: ""
